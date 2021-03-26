@@ -1,0 +1,249 @@
+.modal-background{
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    overflow:hidden;
+    background: rgba(0,0,0,0.5);
+    display:grid;
+    place-items:center;
+}
+
+.modal-card{
+    overflow: scroll;
+    width: 100%;
+    max-width: 1140px;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    position: relative;
+    background:#282828;
+    font-size:16px;
+    line-height:1.2;
+}
+
+
+.modal-card__game-video{
+    width:100vw;
+    height:100vw;
+    background:black;
+    display:flex;
+    justify-content: center;
+    align-items:center;
+}
+
+#btn-play{
+    opacity:0;
+    position: absolute;
+    top:50%;
+    left:50%;
+    color:white;
+    font-size:36px;
+    transform: translate(-50%, -50%);
+    overflow-y:scroll;
+}
+
+.modal-card__game-video:hover #btn-play{
+    opacity:1;
+    z-index:1000;
+    cursor: pointer;
+}
+#game-video:active #btn-play{
+    z-index:-1;
+}
+
+.formatType-horizontal{
+width:100vw;
+height: calc(100vw * 0.5625);
+overflow:hidden;
+display:flex;
+justify-content: center;
+align-items:center;
+position: relative;
+}
+
+.formatType-vertical{
+    height:100%;
+    width: calc(100vw*0.5625);
+    overflow:hidden;
+    display:flex;
+    justify-content: center;
+    align-items:center;
+    position:relative;
+}
+
+.fittingType-width{
+    width:100%;
+    height:auto;
+    object-fit:center;
+
+}
+
+.fittingType-width video{
+    width:100%;
+    height:auto;
+    object-fit:center;
+}
+
+.fittingType-height{
+    height:100%;
+    width:auto;
+    object-fit:center;
+}
+.fittingType-height video{
+    height:100%;
+    width:auto;
+}
+
+.modal-card__game-video.formatType-vertical img{
+    max-width: 210px !important;
+}
+
+.modal-card__game-details{
+    overflow-x:hidden;
+    padding: 1rem;
+    display:flex;
+    flex-direction: column;
+    align-items:flex-start;
+    width:100vw;
+    height: calc(100vh - 100vw);
+    overflow-y:scroll;
+}
+
+
+
+.close-btn{
+    position:absolute;
+    right:24px;
+    top:13px;
+    height:20px;
+    width:20px;
+    cursor: pointer;
+}
+
+.close-btn:focus{
+    background:none;
+}
+
+.modal-card__profile-flex{
+    display:flex;
+    justify-content: flex-start;
+    align-items:center;
+}
+
+.modal-card__profile-flex p{
+    font-size:16px;
+    margin:0;
+    line-height:1.2;
+}
+
+.modal-card__profile-pic{
+    width:24px;
+    height:24px;
+    margin-right:1rem;
+}
+
+.modal-card__likes{
+    color: #A9A9A9;
+    font-weight: 600;
+}
+
+.modal-card__comment-grid{
+    display:grid;
+}
+
+.modal-card__comment-message{
+    margin-left:3rem;
+    line-height:1.5;
+}
+
+.badge{
+    color:#FF517B;
+    font-size: 700;
+    margin-left:1rem !important;
+}
+
+.divider{
+    margin: 0 0.5rem;
+    color:#A9A9A9;
+    font-size:16px;
+    background:none;
+}
+
+.full-screen-hide{
+    display:none;
+}
+
+.full-screen-modal-width{
+    width:100%;
+}
+
+.full-screen-modal-height{
+    height:115vh;
+}
+
+.modal-fullscreen-position{
+    right: 10px;
+    top: 70px;
+    border: 3px solid #150505;
+    padding-right: 18px;
+    padding-top: 5px;
+    padding-bottom: 20px;
+    border-radius: 15px;
+}
+
+@media(min-width: 750px){
+    .modal-card{
+        flex-direction: row;
+        height:50vw;
+        width: calc(50vw + 345px);
+        border-radius: 12px;
+    }
+    .modal-card__game-video{
+       height:100%;
+       width: 50vw;
+       border-radius: 12px 0 0 12px;
+    }
+    .modal-card__game-details{
+        height:100%;
+        max-width:50%;
+    }
+    .formatType-horizontal{
+        height: calc(50vw * 0.5625);
+        width:50vw;
+    }
+        
+    .formatType-vertical{
+        height: 100%;;
+        width: calc(50vw * 0.5625);
+    }
+}
+
+@media(min-width: 1240px){
+    .modal-card{
+        height:80vh;
+    }
+    .modal-card__game-video{
+       width: 80vh;
+    }
+    .formatType-horizontal{
+        height: calc(50vw * 0.5625);
+        width: 80vh;
+    }
+        
+    .formatType-vertical{
+        height: 100%;
+        width: calc(80vh * 0.5625);
+    }
+
+    .full-screen-hide{
+        display:block;
+    }
+
+    .modal-fullscreen-position{
+        right: 40px;
+        top: 20px;
+        
+    }
+}

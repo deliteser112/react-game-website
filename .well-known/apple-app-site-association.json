@@ -1,0 +1,29 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "5DLG8B72WT.app.imbalance",
+        "paths": [
+          "NOT /privacy",
+          "NOT /terms",
+          "/*"
+        ]
+      },
+      {
+        "appID": "RCRB36826S.app.imbalance",
+        "paths": [
+          "NOT /privacy",
+          "NOT /terms",
+          "/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "5DLG8B72WT.app.imbalance",
+      "RCRB36826S.app.imbalance"
+    ]
+  }
+}

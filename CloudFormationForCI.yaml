@@ -1,0 +1,279 @@
+---
+# yamllint disable rule:line-length
+Description: CI stack for testing, building and deploying Imba
+Parameters:
+  Certificate:
+    Description: Certificate ARN for CloudFront
+    Type: String
+  Branch:
+    AllowedValues:
+      - master
+      - develop
+    Default: develop
+    Description: Environment where the application will be deployed to
+    Type: String
+  GitHubRepository:
+    Default: imba-web
+    Description: GitHub repository name
+    Type: String
+  GitHubToken:
+    Description: GitHub Token
+    Type: String
+  GitHubOwner:
+    Default: clickcaramel
+    Description: GitHub User
+    Type: String
+  HostedZoneName:
+    AllowedValues:
+      - imba.dev
+      - imbalance.app
+    Description: Zone where DNS records will be added
+    Type: String
+Resources:
+
+  ImbaBuildPolicy:
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*
+              - Fn::Sub: arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*:*
+          - Action:
+              - cloudfront:*
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - s3:*
+            Effect: Allow
+            Resource:
+              - Fn::Sub: arn:aws:s3:::${ImbaPipelineBucket}/*
+              - Fn::Sub: arn:aws:s3:::${ImbaPipelineBucket}
+              - Fn::Sub: arn:aws:s3:::imba-web-${AWS::Region}-${Branch}
+              - Fn::Sub: arn:aws:s3:::imba-web-${AWS::Region}-${Branch}/*
+        Version: '2012-10-17'
+      PolicyName: ImbaBuildPolicy
+      Roles:
+        - Ref: ImbaBuildRole
+    Type: AWS::IAM::Policy
+
+  ImbaBuildRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+    Type: AWS::IAM::Role
+
+  ImbaCodePipelinePolicy:
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:*
+              - cloudformation:*
+              - iam:PassRole
+            Effect: Allow
+            Resource: '*'
+          - Action:
+              - codebuild:BatchGetBuilds
+              - codebuild:StartBuild
+            Effect: Allow
+            Resource: '*'
+        Version: '2012-10-17'
+      PolicyName: ImbaCodePipelinePolicy
+      Roles:
+        - Ref: ImbaCodePipelineRole
+    Type: AWS::IAM::Policy
+
+  ImbaCodePipelineRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - s3.amazonaws.com
+                - codepipeline.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+    Type: AWS::IAM::Role
+
+  ImbaDeployerPolicy:
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - lambda:*
+              - logs:*
+              - s3:*
+              - cloudformation:*
+              - cloudfront:*
+              - cloudwatch:*
+              - iam:*
+              - route53:*
+              - events:*
+            Effect: Allow
+            Resource: '*'
+        Version: '2012-10-17'
+      PolicyName: ImbaDeployerPolicy
+      Roles:
+        - Ref: ImbaDeployerRole
+    Type: AWS::IAM::Policy
+
+  ImbaDeployerRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+    Type: AWS::IAM::Role
+
+  ImbaPipeline:
+    Properties:
+      ArtifactStore:
+        Location:
+          Ref: ImbaPipelineBucket
+        Type: S3
+      Name:
+        Fn::Sub: ImbaWeb-${Branch}
+      RoleArn:
+        Fn::GetAtt:
+          - ImbaCodePipelineRole
+          - Arn
+      Stages:
+        - Actions:
+            - ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Branch:
+                  Ref: Branch
+                OAuthToken:
+                  Ref: GitHubToken
+                Owner:
+                  Ref: GitHubOwner
+                Repo:
+                  Ref: GitHubRepository
+              InputArtifacts: []
+              Name: Source
+              OutputArtifacts:
+                - Name: Sources
+              RunOrder: 1
+          Name: Source
+
+        - Actions:
+            - ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                Capabilities: CAPABILITY_IAM
+                ParameterOverrides:
+                  Fn::Join:
+                    - ''
+                    - - '{ '
+                      - Fn::Sub: '"Certificate": "${Certificate}", '
+                      - Fn::Sub: '"HostedZoneName": "${HostedZoneName}", '
+                      - Fn::Sub: '"Branch": "${Branch}" '
+                      - '}'
+                RoleArn:
+                  Fn::GetAtt:
+                    - ImbaDeployerRole
+                    - Arn
+                StackName:
+                  Fn::Sub: ImbaWeb-${Branch}
+                TemplatePath: Sources::CloudFormation.yaml
+              InputArtifacts:
+                - Name: Sources
+              Name: DeployInfrastructure
+              RunOrder: 1
+
+            - ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName:
+                  Ref: ImbaWebDeploy
+              InputArtifacts:
+                - Name: Sources
+              Name: DeployWebapp
+              OutputArtifacts:
+                - Name: Webapp
+              RunOrder: 2
+          Name: Deploy
+    Type: AWS::CodePipeline::Pipeline
+
+  ImbaPipelineBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      LifecycleConfiguration:
+        Rules:
+          - Id: Delete old artifacts
+            Prefix: ""
+            Status: Enabled
+            ExpirationInDays: 14
+
+  ImbaWebDeploy:
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Description:
+        Fn::Sub: Deploys Imba Webapp for ${Branch}
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:2.0-1.13.0
+        Type: LINUX_CONTAINER
+      Name:
+        Fn::Sub: ImbaWebDeploy-${Branch}
+      ServiceRole:
+        Fn::GetAtt:
+          - ImbaBuildRole
+          - Arn
+      Source:
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                nodejs: 10
+                python: 3.7
+            build:
+              commands:
+                - npm install && npm run build
+                - aws s3 rm --recursive s3://imba-web-${AWS::Region}-${Branch} --exclude "sitemap*" --region ${AWS::Region}
+                - aws s3 sync .well-known s3://imba-web-${AWS::Region}-${Branch}/.well-known --cache-control "max-age=300" --region ${AWS::Region}
+                - aws s3 cp robots-${Branch}.txt s3://imba-web-${AWS::Region}-${Branch}/robots.txt --cache-control "max-age=300" --region ${AWS::Region}
+                - aws s3 sync build s3://imba-web-${AWS::Region}-${Branch} --cache-control "max-age=2592000" --exclude index.html --region ${AWS::Region}
+                - aws s3 cp build/index.html s3://imba-web-${AWS::Region}-${Branch}/index.html --cache-control "max-age=300" --region ${AWS::Region}
+                - 'aws configure set preview.cloudfront true && aws cloudfront create-invalidation --distribution-id `aws cloudfront list-distributions | node -pe "JSON.parse(require(\"fs\").readFileSync(\"/dev/stdin\").toString()).DistributionList.Items.filter(function(i) { return i.Comment.indexOf(\"Imba for ${Branch}\") >= 0; })[0].Id"` --paths "/*"'
+          artifacts:
+            files:
+              - ./build/**/*
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 10
+    Type: AWS::CodeBuild::Project

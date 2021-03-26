@@ -1,0 +1,31 @@
+.content-container{
+    width: 88%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content-grid{
+    padding-top:2rem;
+    display:grid;
+    grid-gap: 5rem;
+    min-height:200px;
+    width: 100%;
+    position: relative;
+}
+
+.content-grid.horizontal{
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.spinner-loading{
+    position:absolute;
+    top: 50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    z-index:10000;
+}
+
+.content-grid.vertical{
+    grid-template-columns: repeat(auto-fit, minmax(186px, 1fr));}
+
+    

@@ -1,0 +1,218 @@
+---
+# yamllint disable rule:line-length
+Description: Imba application stack for imba resources
+Parameters:
+  Certificate:
+    Description: Certificate ARN for CloudFront
+    Type: String
+  HostedZoneName:
+    AllowedValues:
+      - imba.dev
+      - imbalance.app
+    Description: Zone where DNS records will be added
+    Type: String
+  Branch:
+    AllowedValues:
+      - master
+      - develop
+    Default: develop
+    Description: Environment where the application will be deployed to
+    Type: String
+  AuthUsername:
+    Default: admin
+    Description: Environment where the application will be deployed to
+    Type: String
+  AuthPassword:
+    Default: letsroll
+    Description: Environment where the application will be deployed to
+    Type: String
+Resources:
+
+  EdgeLambdaRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+                - replicator.lambda.amazonaws.com
+            Effect: Allow
+      Policies:
+        - PolicyName: EdgePoliciesLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 'lambda:GetFunction'
+                  - 'lambda:EnableReplication*'
+                  - 'lambda:InvokeFunction'
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                  - 'xray:PutTraceSegments'
+                  - 'xray:PutTelemetryRecords'
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - firehose:PutRecordBatch
+                Effect: Allow
+                Resource: '*'
+
+  AuthEdgeLambdaVersion2:
+    Type: 'AWS::Lambda::Version'
+    Properties:
+      FunctionName:
+        Ref: AuthEdgeLambda
+
+  AuthEdgeLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: 'index.beforeOriginRequest'
+      Role: !GetAtt EdgeLambdaRole.Arn
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+          const path = require('path');
+
+          exports.beforeOriginRequest = (event, context, callback) => {
+            const { request } = event.Records[0].cf;
+            const uri = request.uri;
+            const headers = request.headers;
+            const authPassword = '${AuthPassword}';
+            const authEnabled = authPassword.length > 0;
+            const authUsername = '${AuthUsername}';
+
+            if(authEnabled) {
+              const basicAuthString = 'Basic ' + new Buffer(authUsername + ':' + authPassword).toString('base64');
+              if (headers.authorization == null || headers.authorization[0].value !== basicAuthString) {
+                callback(null, {
+                  status: '401',
+                  statusDescription: 'Unauthorized',
+                  body: 'Please authenticate',
+                  headers: {
+                    'www-authenticate': [{key: 'WWW-Authenticate', value:'Basic'}]
+                  }
+                });
+              }
+            }
+
+            if (path.extname(request.uri) === '') {
+              var endsWithSlash = request.uri.length > 0 && request.uri[request.uri.length - 1] === '/';
+              request.uri = request.uri + (endsWithSlash ? '' : '/') + `index.html`;
+            }
+
+            callback(null, request);
+
+          };
+      Runtime: 'nodejs10.x'
+      Timeout: 5
+      TracingConfig:
+        Mode: 'Active'
+
+  ImbaCloudfront:
+    Properties:
+      DistributionConfig:
+        ViewerCertificate:
+          SslSupportMethod: sni-only
+          AcmCertificateArn:
+            Ref: Certificate
+        Aliases:
+          - Fn::Sub: ${HostedZoneName}
+          - Fn::Sub: www.${HostedZoneName}
+        Comment:
+          Fn::Sub: Imba for ${Branch}
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          Compress: true
+          ForwardedValues:
+            Cookies:
+              Forward: none
+            QueryString: false
+          TargetOriginId: web
+          ViewerProtocolPolicy: redirect-to-https
+          LambdaFunctionAssociations:
+            - EventType: 'viewer-request'
+              LambdaFunctionARN: !Ref AuthEdgeLambdaVersion2
+        DefaultRootObject: index.html
+        Enabled: true
+        Origins:
+          - CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1
+                - TLSv1.1
+                - TLSv1.2
+            DomainName:
+              Fn::GetAtt:
+                - ImbaWebBucket
+                - DomainName
+            Id: web
+        PriceClass: PriceClass_All
+    Type: AWS::CloudFront::Distribution
+
+  ImbaDomain:
+    Properties:
+      AliasTarget:
+        DNSName:
+          Fn::GetAtt:
+            - ImbaCloudfront
+            - DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+      HostedZoneName:
+        Fn::Sub: ${HostedZoneName}.
+      Name:
+        Ref: HostedZoneName
+      Type: A
+    Type: AWS::Route53::RecordSet
+
+  ImbaDomainWww:
+    Properties:
+      AliasTarget:
+        DNSName:
+          Fn::GetAtt:
+            - ImbaCloudfront
+            - DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+      HostedZoneName:
+        Fn::Sub: ${HostedZoneName}.
+      Name:
+        Fn::Sub: www.${HostedZoneName}
+      Type: A
+    Type: AWS::Route53::RecordSet
+
+  ImbaWebBucket:
+    Properties:
+      AccessControl: PublicRead
+      BucketName:
+        Fn::Sub: imba-web-${AWS::Region}-${Branch}
+      WebsiteConfiguration:
+        ErrorDocument: index.html
+        IndexDocument: index.html
+    Type: AWS::S3::Bucket
+
+  ImbaWebBucketPolicy:
+    Properties:
+      Bucket:
+        Fn::Sub: imba-web-${AWS::Region}-${Branch}
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+            Effect: Allow
+            Principal: '*'
+            Resource:
+              Fn::Sub: arn:aws:s3:::imba-web-${AWS::Region}-${Branch}/*
+        Version: '2012-10-17'
+    Type: AWS::S3::BucketPolicy

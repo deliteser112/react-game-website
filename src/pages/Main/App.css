@@ -1,0 +1,163 @@
+html{
+  background: #1F1F1F;
+  font-family: 'Roboto', sans-serif;
+  color: #fff;
+  width:100%;
+  height:100%;
+  position:relative;
+}
+
+button{
+  background:transparent;
+  border:none;
+  outline:none;
+}
+
+.heading-font{
+  font-family: 'Questrial', sans-serif;
+}
+
+.nav-bar{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  padding: 2rem 10%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background-color: transparent;
+  box-shadow:none;
+}
+
+.flex-row{
+  display:flex;
+  align-items: center;
+}
+
+.brand-line{
+  margin-left: 18px;
+  font-size: 22px;
+}
+
+.hero{
+  width:100%;
+  padding-top: 4rem;
+  height: 700px;
+  background: url('/assets/hero-bg-2.svg');
+  background-color:rgba(0,0,0,0.2);
+  background-repeat: no-repeat;
+  background-size:1440px;
+  background-position:top center;
+  display:grid;
+  place-items:center;
+}
+
+.hero-content{
+  text-align:center;
+  overflow:hidden;
+  width:100%;
+}
+.carousel-customized{
+  height: 200px;
+
+}
+.carousel-customized .carousel-item{
+  width:220px;
+  display:grid;
+  place-items: center;
+}
+
+h1{ 
+  font-weight:400;
+  font-size:calc(2.8vw + 0.8rem);
+  margin-bottom: 2rem;
+  padding: 0 4%;
+}
+
+.tagline{
+  font-size: calc(0.4vw + 12px);
+  font-weight:300;
+  opacity:0.7;
+  padding: 0 4%;
+}
+
+
+
+.app-download{
+  margin: 0 auto;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-download img{
+  width: 220px;
+}
+
+@media (min-width: 500px){
+  .app-download{
+    flex-direction: row;
+  }
+  .hero-content-img-div,
+  .hero-content-img{
+    height:320px;
+  }
+  .carousel-customized{
+    height: 300px;
+  }
+  .carousel-customized .carousel-item{
+    width:400px;
+  }
+}
+
+@media(min-width: 800px){
+  .carousel-customized{
+    margin-top:-90px;
+    height: 475px;
+    margin-bottom: 25px;
+  }
+  .carousel-customized .carousel-item{
+    width:600px;
+  }
+  .app-download img{
+    margin-bottom: 50px;
+  }
+}
+.floating-div{
+  width:30px;
+  height:30px;
+  border-radius: 50%;
+  background: #414141;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position:fixed;
+bottom: 2rem;
+ right:2rem;
+}
+
+@media (max-width: 500px){
+  .hero{
+    height: 400px;
+    padding-top: 2rem;
+  }
+
+  .tab-button{
+    margin-top: 10px !important;
+  }
+  .carousel .carousel-item{
+    /* height: 140px; */
+  }
+
+  .carousel-customized{
+    height:170px;
+  }
+
+  .app-download{
+    margin-bottom: -57px;
+    margin-top: -10px;
+  }
+}

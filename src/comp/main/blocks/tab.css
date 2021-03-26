@@ -1,0 +1,41 @@
+.tab-row{
+    display:flex;
+    align-items: center;
+    justify-content:center;
+    width:100%;
+    background: rgba(0,0,0,0.2);
+}
+
+.tab-button{
+    position:relative;
+    font-size:20px;
+    line-height:50px;
+    margin-top: -25px;
+    color:white;
+    opacity: 0.6;
+    margin-right: 2rem;
+    cursor: pointer;
+    text-align:center;
+}
+.tab-button:last-child{
+    margin-right:0;
+}
+
+.tab-button.active{
+    color:white;
+    opacity:1;
+}
+
+.tab-button:after{
+    position:absolute;
+    bottom:0;
+    left:0;
+    content:"";
+    height:2px;
+    width:100%;
+    background-color: transparent;
+}
+
+.tab-button.active:after{
+    background-color: #FFCD1A;
+}

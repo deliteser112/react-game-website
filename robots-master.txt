@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /privacy
+Disallow: /policy
+Disallow: /tos
+Disallow: /pricing
+Allow: /
+# Sitemap: https://imbalance.app/sitemap.xml

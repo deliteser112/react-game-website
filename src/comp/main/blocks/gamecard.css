@@ -1,0 +1,71 @@
+.game-card{
+    margin: 1rem 0;
+    color: #FCFCFC;
+}
+
+.game-card-horizontal{
+    max-width:360px;
+    height:300px;
+    
+}
+
+.game-card-vertical{
+    min-width:186px;
+}
+
+
+.game-image-div{
+    border-radius:15px;
+    overflow: hidden;
+    display:flex;
+    justify-content: center;
+    align-items:center;
+}
+
+.game-card-vertical .game-image-div{
+    width:100%;
+    height:100%;
+}
+
+.game-card-horizontal .game-image-div{
+   width:100%;
+   max-height:200px;
+}
+
+.game-card-horizontal img{
+    width:100%;
+}
+
+.game-card-vertical img{
+    width:100%;
+    border-radius: 15px;
+}
+
+.game-title{
+    font-size:20px;
+    line-height: 30px;
+    width:100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height:30px;
+    margin:0.5rem 0;
+}
+
+.game-author{
+    opacity: 0.5;
+    font-size:16px;
+    margin-bottom:14px;
+    margin:0.5rem 0;
+}
+
+.game-music-row{
+    display:flex;
+    align-items: center;
+    text-transform: capitalize;
+}
+
+.game-music{
+    font-size:14px;
+    margin-left:6px;
+}

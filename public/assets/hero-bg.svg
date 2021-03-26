@@ -1,0 +1,34 @@
+<svg width="1920" height="600" viewBox="0 0 2521 900" fill="none" opacity="0.5" xmlns="http://www.w3.org/2000/svg">
+<path d="M2003.7 0L1103.7 900L586.2 900L1486.2 0L2003.7 0Z" fill="url(#paint0_linear)"/>
+<path d="M1516.5 0L616.5 900L0 900L900 0L1516.5 0Z" fill="url(#paint1_linear)"/>
+<path d="M640.7 0L1540.7 900L2155.7 900L1255.7 0L640.7 0Z" fill="url(#paint2_linear)"/>
+<path d="M1125.9 0L2025.9 900L2520.9 900L1620.9 0L1125.9 0Z" fill="url(#paint3_linear)"/>
+<path d="M1081.38 -6.10352e-05L604.7 476.683V-6.10352e-05L1081.38 -6.10352e-05Z" fill="url(#paint4_linear)"/>
+<path d="M2044.7 -6.10352e-05L1568.02 -6.10352e-05L2044.7 476.683V-6.10352e-05Z" fill="url(#paint5_linear)"/>
+<defs>
+<linearGradient id="paint0_linear" x1="2003.7" y1="0" x2="1189.19" y2="1282.85" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint1_linear" x1="1516.5" y1="0" x2="726.497" y2="1331.16" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint2_linear" x1="640.7" y1="0" x2="1431.08" y2="1330.47" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint3_linear" x1="1125.9" y1="0" x2="1945.89" y2="1270.98" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint4_linear" x1="1081.38" y1="-6.10352e-05" x2="604.7" y2="476.683" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint5_linear" x1="1568.02" y1="-6.10352e-05" x2="2044.7" y2="476.683" gradientUnits="userSpaceOnUse">
+<stop stop-color="#F1E402" stop-opacity="0.2"/>
+<stop offset="0.66" stop-color="#F1E402" stop-opacity="0"/>
+</linearGradient>
+</defs>
+</svg>
